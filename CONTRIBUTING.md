@@ -1,0 +1,3 @@
+# Contributing to k8s-netpol-scope-audit
+
+We welcome focused changes backed by synthetic regression fixtures. Open an issue describing the new rule or false positive before a substantial refactor. Keep the tool offline, values-blind / object-name-only, deterministic and safe on untrusted inputs. Include a failing test, explain the relevant upstream semantics, and run `python -m unittest discover -s tests -v`. Avoid committing secrets, real production plans, cluster configs or tenant-identifying labels. Contributions are covered by the repository's MIT software license; official Area Zero brand marks remain excluded.

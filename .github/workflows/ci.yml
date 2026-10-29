@@ -1,0 +1,34 @@
+name: Verify Agent Skill
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install optional runtime dependency
+        run: if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+      - name: Run unit suite
+        run: python -m unittest discover -s tests -v
+      - name: Verify safe example succeeds
+        run: python scripts/audit.py examples/safe-policy.yaml --format json --fail-on high > safe.json
+      - name: Verify risky example is detected without leaking values
+        run: |
+          python scripts/audit.py examples/review-policy.yaml --format json --fail-on none > reviewed.json
+          python -c 'import json; p=json.load(open("reviewed.json")); assert len(p["findings"]) >= 4'
+      - name: Verify Skill metadata / sample outputs
+        run: |
+          python -c 'from pathlib import Path; p=Path("SKILL.md").read_text(); assert p.startswith("---\nname: k8s-netpol-scope-audit\n"); assert "description:" in p; assert "## Non-trigger" in p'
+          python -c 'from pathlib import Path; assert Path("assets/area-zero-logo-full.svg").is_file(); assert Path("assets/hero.svg").is_file()'
