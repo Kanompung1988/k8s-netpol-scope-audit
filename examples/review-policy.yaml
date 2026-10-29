@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: broad-allow
+  namespace: payments
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - {}
+    - from:
+        - namespaceSelector: {}
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              team: infrastructure
+        - podSelector:
+            matchLabels:
+              app: frontend
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
